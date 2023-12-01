@@ -1,8 +1,11 @@
 <?php
-include_once "../database.php";
-include_once "../Interfaces/ArticlesRepositoryInterface.php";
-include_once "../Article.php";
 
+namespace Lab\Repositories;
+
+use Lab\Interfaces\CommentsRepositoryInterface;
+use Lab\Entities\Comment;
+use Lab\DB;
+use Lab\Exceptions\CommentNotFoundException;
 
 class CommentsRepository implements CommentsRepositoryInterface
 {
@@ -14,15 +17,24 @@ class CommentsRepository implements CommentsRepositoryInterface
 	}
 	public function get(string $uuid): Comment
 	{
-		$result = $this->db->query("SELECT * from comments where uuid=$uuid");
+		$statement = $this->db->prepare('SELECT * from comments where uuid=:uuid');
 
-		$result->fetchArray();
+		$result = $statement->execute([
+			':uuid' => $uuid
+		]);
+
+
+		if ($result === false) {
+			throw new CommentNotFoundException();
+		}
+
+		$result = $result->fetchArray(SQLITE3_ASSOC);
 
 		$comment = new Comment(
 			text: $result["text"],
-			id: $result["id"],
-			article_id: $result["article_id"],
-			author_id: $result["author_id"],
+			id: $result["uuid"],
+			article_id: $result["article_uuid"],
+			author_id: $result["author_uuid"],
 		);
 
 		return $comment;
@@ -30,21 +42,19 @@ class CommentsRepository implements CommentsRepositoryInterface
 
 	public function save(Comment $comment)
 	{
-		$result = $this->db->exec("
-			INSERT INTO comments (uuid, article_uuid, text, author_uuid)
-			VALUES($comment->id, $comment->article_id, $comment->text, $comment->author_id) 
+		$statement = $this->db->prepare(
+			'INSERT INTO comments (uuid, article_uuid, text, author_uuid)
+			VALUES (:uuid, :article_uuid, :text, :author_uuid) 
 			ON CONFLICT(uuid) 
 			DO UPDATE SET 
-			title=excluded.article_id, text=excluded.text, author_id=excluded.author_id;");
+			title=excluded.article_uuid, text=excluded.text, author_id=excluded.author_uuid;'
+		);
 
-		return $comment;
+		$statement->execute([
+			':uuid' => $comment->id,
+			':article_uuid' => $comment->article_id,
+			':text' => $comment->text,
+			':author_uuid' => $comment->author_id,
+		]);
 	}
 }
-
-
-$comment = new Comment(
-	text: "fasdf",
-	id: $result["id"],
-	article_id: $result["article_id"],
-	author_id: $result["author_id"],
-);

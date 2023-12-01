@@ -1,8 +1,11 @@
 <?php
-include_once "../database.php";
-use Article;
-use ArticlesRepositoryInterface;
 
+namespace Lab\Repositories;
+
+use Lab\Entities\Article;
+use Lab\Interfaces\ArticlesRepositoryInterface;
+use Lab\Db;
+use Lab\Exceptions\ArticleNotFoundException;
 
 class ArticlesRepository implements ArticlesRepositoryInterface
 {
@@ -14,15 +17,24 @@ class ArticlesRepository implements ArticlesRepositoryInterface
 	}
 	public function get(string $uuid): Article
 	{
-		$result = $this->db->query("SELECT * from user where uuid=$uuid");
+		$statement = $this->db->prepare('SELECT * from user where uuid=:uuid');
 
-		$result->fetchArray();
+		$result = $statement->execute([
+			':uuid' => $uuid
+		]);
+
+
+		if ($result === false) {
+			throw new ArticleNotFoundException();
+		}
+
+		$result = $result->fetchArray(SQLITE3_ASSOC);
 
 		$article = new Article(
 			text: $result["text"],
-			id: $result["id"],
+			id: $result["uuid"],
 			title: $result["title"],
-			author_id: $result["author_id"],
+			author_id: $result["author_uuid"],
 		);
 
 		return $article;
@@ -30,26 +42,19 @@ class ArticlesRepository implements ArticlesRepositoryInterface
 
 	public function save(Article $article)
 	{
-		$query = "
-			INSERT INTO articles (uuid, title, text, author_uuid)
-			VALUES(\"$article->id\", \"$article->title\", \"$article->text\", \"$article->author_id\") 
+		$statement = $this->db->prepare(
+			'INSERT INTO articles (uuid, title, text, author_uuid)
+			VALUES(:uuid, :title, :text, :author_uuid) 
 			ON CONFLICT(uuid) 
 			DO UPDATE SET 
-			title=excluded.title, text=excluded.text, author_uuid=excluded.author_uuid;";
-		print_r($query);
-		$result = $this->db->exec($query);
+			title=excluded.title, text=excluded.text, author_uuid=excluded.author_uuid;'
+		);
 
-		return $article;
+		$statement->execute([
+			':uuid' => $article->id,
+			':title' => $article->title,
+			':text' => $article->text,
+			':author_uuid' => $article->author_id,
+		]);
 	}
 }
-
-
-$article = new Article(
-	text: "fasdf",
-	id: 1,
-	title: "flaksdjflk",
-	author_id: 1,
-);
-
-$repository = new ArticlesRepository($db);
-$repository->save($article);

@@ -1,4 +1,6 @@
 <?php
+namespace Lab\Entities;
+
 class User
 {
 	public string $id;

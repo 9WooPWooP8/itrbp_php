@@ -1,4 +1,6 @@
 <?php
+namespace Lab\Entities;
+
 class Article
 {
 	public function __construct(

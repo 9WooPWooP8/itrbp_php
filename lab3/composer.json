@@ -3,7 +3,14 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Nikitabykov\\Lab3\\": "src/"
+            "Lab\\": "src/",
+            "Tests\\": "tests/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lab3\\": "src/",
+            "Tests\\": "tests/"
         }
     },
     "authors": [
@@ -14,5 +21,8 @@
     ],
     "require": {
         "fakerphp/faker": "^1.23"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
     }
 }
