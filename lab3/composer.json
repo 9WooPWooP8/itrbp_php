@@ -1,0 +1,18 @@
+{
+    "name": "nikitabykov/lab3",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Nikitabykov\\Lab3\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nikita Bykov",
+            "email": "kilopus.com@gmail.com"
+        }
+    ],
+    "require": {
+        "fakerphp/faker": "^1.23"
+    }
+}
