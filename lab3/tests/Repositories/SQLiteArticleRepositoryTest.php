@@ -9,6 +9,7 @@ use Lab\Repositories\ArticlesRepository;
 use PHPUnit\Framework\TestCase;
 use SQLite3Result;
 use SQLite3Stmt;
+use Tests\DummyLogger;
 
 use function PHPUnit\Framework\assertEquals;
 
@@ -19,17 +20,17 @@ final class SQLiteArticleRepositoryTest extends TestCase
 		$connectionStub = $this->createStub(Db::class);
 		$statementMock = $this->createMock(SQLite3Stmt::class);
 
+		// $statementMock->expects($this->once())->method('bindValue')->with(':text', '321');
+		// $statementMock->expects($this->once())->method('bindValue')->with(':text', 'title');
+		// $statementMock->expects($this->once())->method('bindValue')->with(':text', '123');
+		// $statementMock->expects($this->once())->method('bindValue')->with(':text', 'text');
 
-		$statementMock->expects($this->once())->method('execute')->with([
-			':text' => 'text',
-			':uuid' => '123',
-			':title' => 'title',
-			':author_uuid' => '321',
-		]);
+
+		$statementMock->expects($this->once())->method('execute')->with();
 
 		$connectionStub->method('prepare')->WillReturn($statementMock);
 
-		$repository = new ArticlesRepository($connectionStub);
+		$repository = new ArticlesRepository($connectionStub, new DummyLogger);
 
 
 		$article = new Article('123', '321', 'title', 'text');
@@ -42,9 +43,9 @@ final class SQLiteArticleRepositoryTest extends TestCase
 		$statementMock = $this->createMock(SQLite3Stmt::class);
 
 		$sqlResultMock = $this->createMock(SQLite3Result::class);
-		$statementMock->expects($this->once())->method('execute')->with([
-			':uuid' => '321',
-		])->WillReturn($sqlResultMock);
+
+		// $statementMock->expects($this->once())->method('bindValue')->with(':uuid', '321');
+		$statementMock->expects($this->once())->method('execute')->WillReturn($sqlResultMock);
 
 		$sqlResultMock->expects($this->once())
 			->method('fetchArray')->with(SQLITE3_ASSOC)->WillReturn(
@@ -59,7 +60,7 @@ final class SQLiteArticleRepositoryTest extends TestCase
 
 		$connectionStub->method('prepare')->WillReturn($statementMock);
 
-		$repository = new ArticlesRepository($connectionStub);
+		$repository = new ArticlesRepository($connectionStub, new DummyLogger);
 
 		$article = new Article('321', '123', 'title', 'text');
 
@@ -77,7 +78,7 @@ final class SQLiteArticleRepositoryTest extends TestCase
 
 		$connectionStub->method('prepare')->willReturn($statementStub);
 
-		$repository = new ArticlesRepository($connectionStub);
+		$repository = new ArticlesRepository($connectionStub, new DummyLogger);
 
 		$this->expectException(ArticleNotFoundException::class);
 

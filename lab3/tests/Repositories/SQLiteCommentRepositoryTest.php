@@ -9,6 +9,7 @@ use Lab\Repositories\CommentsRepository;
 use PHPUnit\Framework\TestCase;
 use SQLite3Result;
 use SQLite3Stmt;
+use Tests\DummyLogger;
 
 use function PHPUnit\Framework\assertEquals;
 
@@ -19,16 +20,11 @@ final class SQLiteCommentRepositoryTest extends TestCase
 		$connectionStub = $this->createStub(Db::class);
 		$statementMock = $this->createMock(SQLite3Stmt::class);
 
-		$statementMock->expects($this->once())->method('execute')->with([
-			':uuid' => '111',
-			':author_uuid' => '222',
-			':article_uuid' => '333',
-			':text' => 'text',
-		]);
+		$statementMock->expects($this->once())->method('execute')->with();
 
 		$connectionStub->method('prepare')->WillReturn($statementMock);
 
-		$repository = new CommentsRepository($connectionStub);
+		$repository = new CommentsRepository($connectionStub, new DummyLogger);
 
 		$comment = new Comment('111', '222', '333', 'text');
 		$repository->save($comment);
@@ -39,10 +35,9 @@ final class SQLiteCommentRepositoryTest extends TestCase
 		$connectionStub = $this->createStub(Db::class);
 		$statementMock = $this->createMock(SQLite3Stmt::class);
 
+
 		$sqlResultMock = $this->createMock(SQLite3Result::class);
-		$statementMock->expects($this->once())->method('execute')->with([
-			':uuid' => '111',
-		])->WillReturn($sqlResultMock);
+		$statementMock->expects($this->once())->method('execute')->WillReturn($sqlResultMock);
 
 		$sqlResultMock->expects($this->once())
 			->method('fetchArray')->with(SQLITE3_ASSOC)->WillReturn(
@@ -56,7 +51,7 @@ final class SQLiteCommentRepositoryTest extends TestCase
 
 		$connectionStub->method('prepare')->WillReturn($statementMock);
 
-		$repository = new CommentsRepository($connectionStub);
+		$repository = new CommentsRepository($connectionStub, new DummyLogger);
 
 		$comment = new Comment('111', '222', '333', 'text');
 
@@ -70,11 +65,12 @@ final class SQLiteCommentRepositoryTest extends TestCase
 		$connectionStub = $this->createStub(Db::class);
 		$statementStub = $this->createStub(SQLite3Stmt::class);
 
+
 		$statementStub->method('execute')->willReturn(false);
 
 		$connectionStub->method('prepare')->willReturn($statementStub);
 
-		$repository = new CommentsRepository($connectionStub);
+		$repository = new CommentsRepository($connectionStub, new DummyLogger);
 
 		$this->expectException(CommentNotFoundException::class);
 

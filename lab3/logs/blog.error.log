@@ -1,0 +1,3 @@
+[2023-12-08T05:40:43.967938+00:00] blog.ERROR:  {"exception":"[object] (Lab\\Exceptions\\MoreThanOneLikeException(code: 0):  at /home/nikita/Code/university/itrbp_php/lab3/src/Repositories/ArticlesLikesRepository.php:91)"} []
+[2023-12-08T05:44:22.739973+00:00] blog.ERROR:  {"exception":"[object] (Lab\\Exceptions\\MoreThanOneLikeException(code: 0):  at /home/nikita/Code/university/itrbp_php/lab3/src/Repositories/ArticlesLikesRepository.php:92)"} []
+[2023-12-08T05:46:12.431012+00:00] blog.ERROR:  {"exception":"[object] (Lab\\Exceptions\\MoreThanOneLikeException(code: 0):  at /home/nikita/Code/university/itrbp_php/lab3/src/Repositories/ArticlesLikesRepository.php:92)"} []

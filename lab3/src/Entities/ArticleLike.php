@@ -1,13 +1,12 @@
 <?php
 namespace Lab\Entities;
 
-class User
+class ArticleLike
 {
 	public function __construct(
 		public string $id,
-		public string $name,
-		public string $surname,
+		public string $user_id,
+		public string $article_id,
 	) {
 	}
 }
-

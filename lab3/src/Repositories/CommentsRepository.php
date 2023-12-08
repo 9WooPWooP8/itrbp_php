@@ -4,24 +4,23 @@ namespace Lab\Repositories;
 
 use Lab\Interfaces\CommentsRepositoryInterface;
 use Lab\Entities\Comment;
-use Lab\DB;
+use Lab\Db;
 use Lab\Exceptions\CommentNotFoundException;
+use Psr\Log\LoggerInterface;
+use SQLite3;
 
 class CommentsRepository implements CommentsRepositoryInterface
 {
-	public DB $db;
-
-	public function __construct(DB $db = null)
+	public function __construct(private SQLite3 $db, private LoggerInterface $logger)
 	{
-		$this->db = $db;
 	}
 	public function get(string $uuid): Comment
 	{
 		$statement = $this->db->prepare('SELECT * from comments where uuid=:uuid');
 
-		$result = $statement->execute([
-			':uuid' => $uuid
-		]);
+		$statement->bindValue(':uuid', $uuid);
+
+		$result = $statement->execute();
 
 
 		if ($result === false) {
@@ -42,19 +41,21 @@ class CommentsRepository implements CommentsRepositoryInterface
 
 	public function save(Comment $comment)
 	{
+		$this->logger->warning(sprintf("saving comment %s", $comment->id));
+
 		$statement = $this->db->prepare(
 			'INSERT INTO comments (uuid, article_uuid, text, author_uuid)
 			VALUES (:uuid, :article_uuid, :text, :author_uuid) 
 			ON CONFLICT(uuid) 
 			DO UPDATE SET 
-			title=excluded.article_uuid, text=excluded.text, author_id=excluded.author_uuid;'
+			article_uuid=excluded.article_uuid, text=excluded.text, author_uuid=excluded.author_uuid;'
 		);
 
-		$statement->execute([
-			':uuid' => $comment->id,
-			':article_uuid' => $comment->article_id,
-			':text' => $comment->text,
-			':author_uuid' => $comment->author_id,
-		]);
+		$statement->bindValue(':uuid', $comment->id);
+		$statement->bindValue(':article_uuid',$comment->article_id);
+		$statement->bindValue(':text', $comment->text);
+		$statement->bindValue(':author_uuid', $comment->author_id);
+
+		$statement->execute();
 	}
 }
